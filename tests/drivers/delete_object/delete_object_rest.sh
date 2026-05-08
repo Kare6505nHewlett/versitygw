@@ -17,7 +17,6 @@
 source ./tests/commands/list_objects_v2.sh
 source ./tests/drivers/list_object_versions/list_object_versions_rest.sh
 source ./tests/drivers/xml.sh
-source ./tests/util/util_legal_hold.sh
 
 list_and_delete_objects() {
   log 6 "list_and_delete_objects: '$1'"
