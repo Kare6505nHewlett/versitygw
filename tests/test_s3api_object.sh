@@ -43,6 +43,9 @@ source ./tests/commands/put_object_retention.sh
 source ./tests/commands/put_public_access_block.sh
 source ./tests/commands/select_object_content.sh
 source ./tests/drivers/copy_object/copy_object_rest.sh
+source ./tests/drivers/get_object_attributes/get_object_attributes_s3api.sh
+source ./tests/drivers/get_object_legal_hold/get_object_legal_hold.sh
+source ./tests/drivers/get_object_retention/get_object_retention_s3api.sh
 source ./tests/drivers/get_object_tagging/get_object_tagging.sh
 source ./tests/drivers/list_buckets/list_buckets_rest.sh
 source ./tests/drivers/put_bucket_ownership_controls/put_bucket_ownership_controls_rest.sh
