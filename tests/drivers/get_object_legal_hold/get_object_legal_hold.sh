@@ -15,7 +15,7 @@
 # under the License.
 
 get_and_check_legal_hold() {
-  if ! check_param_count "get_and_check_legal_hold" "client, bucket, key, expected status" 4 $#; then
+  if ! check_param_count_v2 "client, bucket, key, expected status" 4 $#; then
     return 1
   fi
   if ! head_object "$1" "$2" "$3"; then

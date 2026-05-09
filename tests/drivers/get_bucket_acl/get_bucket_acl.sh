@@ -103,8 +103,7 @@ get_check_acl_after_second_put() {
 }
 
 get_bucket_acl_and_check_owner() {
-  if [ $# -ne 2 ]; then
-    log 2 "'get_acl_and_check_owner' requires client, bucket name"
+  if ! check_param_count_v2 "client, bucket name" 2 $#; then
     return 1
   fi
   if ! get_bucket_acl "$1" "$2"; then

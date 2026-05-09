@@ -15,8 +15,7 @@
 # under the License.
 
 bucket_info_contains_bucket() {
-  if [ $# -ne 2 ]; then
-    log 2 "'bucket_info_contains_bucket' requires client, bucket"
+  if ! check_param_count_v2 "client, bucket" 2 $#; then
     return 1
   fi
   if ! head_bucket "mc" "$BUCKET_ONE_NAME"; then
