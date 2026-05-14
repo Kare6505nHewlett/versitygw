@@ -60,6 +60,27 @@ func TestAuthMiddleware_SkipPath(t *testing.T) {
 	}
 }
 
+// TestAuthMiddleware_SkipPath_Nested verifies that skip path matching is
+// exact and does not accidentally skip sub-paths like /healthz or /health/check.
+func TestAuthMiddleware_SkipPath_Nested(t *testing.T) {
+	cfg := DefaultAuthConfig()
+	cfg.SkipPaths = []string{"/health"}
+	mw := AuthMiddleware(cfg)
+
+	handler := mw(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	// /healthz should NOT be skipped — it is a different path.
+	req := httptest.NewRequest(http.MethodGet, "/healthz", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusUnauthorized {
+		t.Errorf("expected 401 for /healthz (not in skip list), got %d", rec.Code)
+	}
+}
+
 func TestAuthMiddleware_CustomValidator(t *testing.T) {
 	cfg := AuthConfig{
 		SkipPaths: []string{},
