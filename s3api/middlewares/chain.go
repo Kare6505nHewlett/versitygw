@@ -2,29 +2,37 @@ package middlewares
 
 import "net/http"
 
-// Middleware defines a standard middleware type that wraps an http.Handler.
-type Middleware func(http.Handler) http.Handler
-
-// Chain applies a list of middlewares to a handler in order, so that the
-// first middleware in the list is the outermost (executed first).
-//
-// Example:
-//
-//	handler := Chain(myHandler, RecoveryMiddleware, RequestIDMiddleware, LoggingMiddleware)
-func Chain(h http.Handler, middlewares ...Middleware) http.Handler {
-	// Apply in reverse so the first middleware wraps the outermost layer.
+// Chain applies a sequence of middleware functions to an http.Handler,
+// executing them in the order they are provided (outermost first).
+func Chain(h http.Handler, middlewares ...func(http.Handler) http.Handler) http.Handler {
 	for i := len(middlewares) - 1; i >= 0; i-- {
 		h = middlewares[i](h)
 	}
 	return h
 }
 
-// DefaultMiddlewares returns the standard middleware stack used by versitygw:
-// recovery → request ID → logging.
-func DefaultMiddlewares() []Middleware {
-	return []Middleware{
+// DefaultMiddlewares returns the standard set of middlewares used by versitygw,
+// applied in the recommended order: recovery → request ID → logging → CORS.
+func DefaultMiddlewares() []func(http.Handler) http.Handler {
+	return []func(http.Handler) http.Handler{
 		RecoveryMiddleware,
 		RequestIDMiddleware,
 		LoggingMiddleware,
+		CORSMiddleware(DefaultCORSConfig()),
+	}
+}
+
+// DefaultMiddlewaresWithRateLimit returns the standard middleware stack with
+// an additional rate limiting layer inserted before CORS handling.
+func DefaultMiddlewaresWithRateLimit(cfg RateLimitConfig) []func(http.Handler) http.Handler {
+	if cfg.RequestsPerSecond <= 0 {
+		cfg = DefaultRateLimitConfig()
+	}
+	return []func(http.Handler) http.Handler{
+		RecoveryMiddleware,
+		RequestIDMiddleware,
+		LoggingMiddleware,
+		RateLimitMiddleware(cfg),
+		CORSMiddleware(DefaultCORSConfig()),
 	}
 }
