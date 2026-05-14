@@ -72,6 +72,10 @@ func TestCORSMiddleware_SpecificOriginDenied(t *testing.T) {
 	if got := rec.Header().Get("Access-Control-Allow-Origin"); got != "" {
 		t.Errorf("expected no CORS header for disallowed origin, got %q", got)
 	}
+	// Also verify the handler still ran and returned 200 (origin denial only suppresses headers)
+	if rec.Code != http.StatusOK {
+		t.Errorf("expected 200 even for disallowed origin, got %d", rec.Code)
+	}
 }
 
 func TestCORSMiddleware_PreflightReturns204(t *testing.T) {
