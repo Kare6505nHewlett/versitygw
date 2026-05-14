@@ -29,7 +29,7 @@ func TestLoggingMiddleware_DefaultStatus(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
 	handler := LoggingMiddleware(logger)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// no explicit WriteHeader call
+		// no explicit WriteHeader call; default should be 200 OK
 		_, _ = w.Write([]byte("ok"))
 	}))
 
@@ -62,6 +62,30 @@ func TestLoggingMiddleware_WithRequestID(t *testing.T) {
 
 	if rec.Code != http.StatusOK {
 		t.Errorf("expected status %d, got %d", http.StatusOK, rec.Code)
+	}
+}
+
+func TestLoggingMiddleware_MethodAndPath(t *testing.T) {
+	// Verify that the middleware doesn't interfere with method or path handling.
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+
+	var capturedMethod, capturedPath string
+	handler := LoggingMiddleware(logger)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		capturedMethod = r.Method
+		capturedPath = r.URL.Path
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	req := httptest.NewRequest(http.MethodDelete, "/bucket/key", nil)
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+
+	if capturedMethod != http.MethodDelete {
+		t.Errorf("expected method %s, got %s", http.MethodDelete, capturedMethod)
+	}
+	if capturedPath != "/bucket/key" {
+		t.Errorf("expected path /bucket/key, got %s", capturedPath)
 	}
 }
 
