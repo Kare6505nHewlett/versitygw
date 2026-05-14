@@ -22,6 +22,8 @@ func GenerateRequestID() (string, error) {
 
 // RequestIDMiddleware injects a unique request ID into each request context
 // and sets the x-amz-request-id response header.
+// Also sets x-request-id for broader compatibility with reverse proxies and
+// logging infrastructure that may not recognize the x-amz-request-id header.
 func RequestIDMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		reqID, err := GenerateRequestID()
@@ -32,6 +34,7 @@ func RequestIDMiddleware(next http.Handler) http.Handler {
 
 		ctx := context.WithValue(r.Context(), RequestIDKey, reqID)
 		w.Header().Set("x-amz-request-id", reqID)
+		w.Header().Set("x-request-id", reqID)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
