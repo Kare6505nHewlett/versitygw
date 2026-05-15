@@ -60,6 +60,12 @@ func TestRecoveryMiddleware_WithRequestID(t *testing.T) {
 	if rr.Code != http.StatusInternalServerError {
 		t.Errorf("expected status 500, got %d", rr.Code)
 	}
+
+	// Also verify the response body contains InternalError when a request ID is present
+	body := rr.Body.String()
+	if !strings.Contains(body, "InternalError") {
+		t.Errorf("expected InternalError in response body when request ID is set, got: %s", body)
+	}
 }
 
 func TestRecoveryMiddleware_ContentType(t *testing.T) {
