@@ -24,6 +24,8 @@ func DefaultMiddlewares() []func(http.Handler) http.Handler {
 
 // DefaultMiddlewaresWithRateLimit returns the standard middleware stack with
 // an additional rate limiting layer inserted before CORS handling.
+// Note: if cfg is invalid, falls back to DefaultRateLimitConfig. Rate limiting
+// is placed after logging so that rejected requests are still logged.
 func DefaultMiddlewaresWithRateLimit(cfg RateLimitConfig) []func(http.Handler) http.Handler {
 	if cfg.RequestsPerSecond <= 0 {
 		cfg = DefaultRateLimitConfig()
