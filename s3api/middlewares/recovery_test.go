@@ -66,6 +66,11 @@ func TestRecoveryMiddleware_WithRequestID(t *testing.T) {
 	if !strings.Contains(body, "InternalError") {
 		t.Errorf("expected InternalError in response body when request ID is set, got: %s", body)
 	}
+
+	// Verify the request ID is reflected in the response body
+	if !strings.Contains(body, testRequestID) {
+		t.Errorf("expected request ID %q in response body, got: %s", testRequestID, body)
+	}
 }
 
 func TestRecoveryMiddleware_ContentType(t *testing.T) {
