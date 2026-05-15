@@ -22,6 +22,7 @@ import (
 
 func TestDefaultTimeoutConfig(t *testing.T) {
 	cfg := DefaultTimeoutConfig()
+	// Default timeout is 30s; adjust this if the default changes upstream.
 	if cfg.Timeout != 30*time.Second {
 		t.Errorf("expected 30s default timeout, got %v", cfg.Timeout)
 	}
@@ -45,7 +46,8 @@ func TestTimeoutMiddleware_CompletesInTime(t *testing.T) {
 
 func TestTimeoutMiddleware_Exceeds(t *testing.T) {
 	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		time.Sleep(200 * time.Millisecond)
+		// Sleep longer than the configured timeout to trigger a 504.
+		time.Sleep(300 * time.Millisecond)
 		w.WriteHeader(http.StatusOK)
 	})
 
