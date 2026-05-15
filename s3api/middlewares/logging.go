@@ -25,7 +25,8 @@ func (rw *responseWriter) WriteHeader(code int) {
 
 // LoggingMiddleware logs each incoming HTTP request along with its method, path,
 // status code, duration, and request ID (if available).
-// Note: log level is set to Warn for 4xx/5xx responses to make errors easier to spot.
+// Note: log level is set to Warn for 4xx responses and Error for 5xx responses
+// to make it easier to distinguish client errors from server errors.
 func LoggingMiddleware(logger *slog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -46,9 +47,12 @@ func LoggingMiddleware(logger *slog.Logger) func(http.Handler) http.Handler {
 				slog.String("remote_addr", r.RemoteAddr),
 			}
 
-			if rw.statusCode >= 400 {
+			switch {
+			case rw.statusCode >= 500:
+				logger.Error("request completed", attrs...)
+			case rw.statusCode >= 400:
 				logger.Warn("request completed", attrs...)
-			} else {
+			default:
 				logger.Info("request completed", attrs...)
 			}
 		})
