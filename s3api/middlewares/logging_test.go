@@ -102,3 +102,17 @@ func TestResponseWriter_WriteHeader(t *testing.T) {
 		t.Errorf("expected underlying recorder status %d, got %d", http.StatusNotFound, rec.Code)
 	}
 }
+
+// TestResponseWriter_WriteHeaderIdempotent checks that calling WriteHeader more than once
+// only records the first status code, matching net/http's documented behaviour.
+func TestResponseWriter_WriteHeaderIdempotent(t *testing.T) {
+	rec := httptest.NewRecorder()
+	rw := newResponseWriter(rec)
+
+	rw.WriteHeader(http.StatusAccepted)
+	rw.WriteHeader(http.StatusInternalServerError) // should be ignored
+
+	if rw.statusCode != http.StatusAccepted {
+		t.Errorf("expected status %d after duplicate WriteHeader, got %d", http.StatusAccepted, rw.statusCode)
+	}
+}
